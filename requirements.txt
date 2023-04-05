@@ -1,0 +1,4 @@
+schedule
+smtplib
+dnspython 
+requests
