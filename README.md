@@ -137,3 +137,6 @@ Within the next 6 months, I intend to implement the following features to make S
  - Increase dictionary size for services - have even more services to be identified
  - A record service identification - For example, if WordPress is running on a subdomain, the script will be able to identify the service using HTTP response signatures, and other information. 
  - Ability to use a proxy for when HTTP requests are sent, for example with the `get_http_status` function
+ - Handle services where deprovisioned services would be non resolving, or have no HTML content signatures. For example, some AWS products that return an `NXDOMAIN` when the service is no longer in use. This is currently handled with a [POTENTIAL] output, where the CNAME matches, but there isn't a HTML signature to confirm with. I want to handle these more efficiently. 
+## Disclaimer
+This script is intended for educational purposes and lawful use only. It should only be used with the explicit permission of the domain owner or within the guidelines of a bug bounty program that permits the use of such tools. The developer of this script is not responsible or liable for any misuse or damage resulting from the improper use of this script. Before using this script in a bug bounty program, please ensure that the program's rules and guidelines allow its use. Use this script responsibly and ethically.
