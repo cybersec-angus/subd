@@ -12,13 +12,15 @@ SUBD is a cool and simple Python script aimed at both blue teams and red teams t
 
 ## Installation
 Easy to install:
+<br>
 Step 1:
 `cd /desired/install/directory`
+<br>
 Step 2: Install the required dependencies, run:
 `pip install -r requirements.txt` 
 or 
 `pip3 install -r requirements.txt` 
-
+<br>
 This script requires the following packages:
 -   schedule
 -   smtplib
@@ -37,7 +39,6 @@ To run the script, execute the following command from the install directory:
 | -w, --wordlist | Path to the wordlist for subdomain enumeration (required) |
 | -d, --domains | Domain(s) as either a single domain, multiple domains (domain.com,domain2.com) or CSV file (required) |
 | -v, --verbose | Enable verbose output |
-| -e, --email | Admin email to send notifications to (requires additional setup, see below) |
 | -ps, --port-scan| Enables port scan on discovered subdomains |
 
 #### Scan Options (Mutually Exclusive)
@@ -50,14 +51,10 @@ To run the script, execute the following command from the install directory:
 |Argument|Description  |
 |--|--|
 | -qs, --quick-port-scan | Quick port scan of the top 22 most common ports. Includes HTTPS, HTTP, SSH, Telnet, etc. See below for more details. |
-| -fs, --full-port-scan | Full port scan of the top 145 ports used on web servers. Note: This will take a while. It is recommended to run this alongside the email feature, and leave it to do its thing; Especially with a long wordlist.|
+| -fs, --full-port-scan | Full port scan of the top 145 ports used on web servers. Note: This will take a while. It is reccomended to let it do its thing and return later,  especially with a long wordlist.|
 #### Additional Arguments
 |Argument|Description  |
 |--|--|
-| --email-server | SMTP server for sending email notifications |
-| --email-port | SMTP server port |
-| --email-user | SMTP server username |
-| --email-password | SMTP server password |
 | -sc, --schedule | Schedule scans to repeat. Value is a number in minutes. Should be used with a --interval argument unless you want to use the default interval of 60 mins. |
 | --interval | Scan interval in minutes (As above, default: 60) |
 
