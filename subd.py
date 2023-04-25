@@ -542,7 +542,9 @@ def main():
       \__ \/ / / / __  / / / / / __ \/ / / /
      ___/ / /_/ / /_/ / /_/ / / /_/ / /_/ / 
     /____/\____/_____/_____(_) .___/\__, /  
-                            /_/    /____/   
+                            /_/    /____/  
+        ''', "yellow")) 
+    print(colored(f'''
    [*] By CyberSec-Angus
    [*] github.com/cybersec-angus
    [*] Starting to find subdomains...
