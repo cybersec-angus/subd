@@ -9,7 +9,6 @@ import dns.resolver
 import time
 import smtplib
 import re
-import requests
 from dns.resolver import NoAnswer
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
