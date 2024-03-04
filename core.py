@@ -35,7 +35,7 @@ def main():
     print(colored(f'''
    [*] By CyberSec-Angus
    [*] github.com/cybersec-angus
-   [*] Version 1.1.0
+   [*] Version 2.0.0
         ''', "green"))
     print(colored(f'''
    [*] Starting my Submarine
