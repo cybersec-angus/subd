@@ -129,22 +129,7 @@ def check_cname_exists_in_services(cname_value, services):
 
 mx_record_domain = None
 
-#def mx_record_check(domain):
-#    global mx_record_domain
-#    try:
-#        answers = dns.resolver.resolve(domain, "MX")
-#        for answer in answers:
-#            mx_record_domain = str(answer.address)
-#            return mx_record_domain
-#    except dns.resolver.NoAnswer:
-#        return None, None
-#    except dns.name.LabelTooLong:
-#        print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping this domain.")
-#        return None, None
-#    except Exception as e:
-#        return None, None
-
-def mx_record_check(domain):
+def mx_record_check_main(domain):
     try:
         answers = dns.resolver.resolve(domain, "MX")
         if len(answers) > 0:
@@ -159,29 +144,83 @@ def mx_record_check(domain):
     except:
         return False
 
+def mx_record_check(subdomain):
+    try:
+        answers = dns.resolver.resolve(subdomain, "MX")
+        if len(answers) > 0:
+            return answers[0]
+        else:
+            return False
+    except dns.resolver.NoAnswer:
+        return False
+    except dns.name.LabelTooLong:
+        print(f"[WARNING] {subdomain} has a label longer than 63 octets. Skipping.")
+        return False
+    except:
+        return False
 
 
-def mx_id(mx_record_check, MAIL_SERVICES):
-    for service in MAIL_SERVICES.values():
-        if service.lower() in mx_record_check.lower():
-            return True
-    return False
+def mx_in_service(subdomain):
+    try:
+        answers = dns.resolver.resolve(subdomain, "MX")
+        for answer in answers:
+            mx_value = str(answer.exchange).lower()
+            for service, domain_pattern in MAIL_SERVICES.items():
+                if "*" not in domain_pattern:
+                    if domain_pattern.lower() in mx_value:
+                        return service, mx_value
+                else:
+                    # Handles wildcard subdomains
+                    domain_parts = domain_pattern.split("*")
+                    if len(domain_parts) > 2:
+                        continue  # Not a valid wildcard pattern
+                    if domain_parts[0] and not mx_value.startswith(domain_parts[0].lower()):
+                        continue  # Subdomain does not match the prefix
+                    if domain_parts[1] and not mx_value.endswith(domain_parts[1].lower()):
+                        continue  # Subdomain does not match the suffix
+                return service, mx_value
+    except dns.resolver.NoAnswer:
+        return None, None
+    except dns.name.LabelTooLong:
+        print(f"[WARNING] {subdomain} has a label longer than 63 octets. Skipping this subdomain.")
+        return None, None
+    except dns.resolver.NXDOMAIN:
+        return None, None
+    except Exception as e:
+        return None, None
+    return None, None
 
+def mx_in_service_main(domain):
+    try:
+        answers = dns.resolver.resolve(domain, "MX")
+        for answer in answers:
+            mx_value = str(answer.exchange).lower()
 
-#def mx_id(mx_record, MAIL_SERVICES):
-#    for mx_record, domain in MAIL_SERVICES.items():
-#        if mx_record_domain.endswith(domain):
-#            return True
-#    return False
+            for service, domain_pattern in MAIL_SERVICES.items():
+                if "*" not in domain_pattern:
+                    if domain_pattern.lower() in mx_value:
+                        return service, mx_value
+                else:
+                    # Handles wildcard subdomains
+                    domain_parts = domain_pattern.split("*")
+                    if len(domain_parts) > 2:
+                        continue  # Not a valid wildcard pattern
+                    if domain_parts[0] and not mx_value.startswith(domain_parts[0].lower()):
+                        continue  # Subdomain does not match the prefix
+                    if domain_parts[1] and not mx_value.endswith(domain_parts[1].lower()):
+                        continue  # Subdomain does not match the suffix
 
-
-#def mx_id(mx_record_domain, MAIL_SERVICES):
-#    for MAIL_SERVICES  in MAIL_SERVICES.values():
-#        if MAIL_SERVICES.lower() in mx_record_domain.lower():
-#            return True
-#        else:
-#            return False
-#    return False
+                    return service, mx_value
+    except dns.resolver.NoAnswer:
+        return None, None
+    except dns.name.LabelTooLong:
+        print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping this subdomain.")
+        return None, None
+    except dns.resolver.NXDOMAIN:
+        return None, None
+    except Exception as e:
+        return None, None
+    return None, None
 
 # checks the status of the service at the end of the CNAME, and then checks if the HTML pattern is apart of the HTML dictionary
 def check_service_status(url):

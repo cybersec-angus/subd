@@ -7,7 +7,7 @@ from dictionaries.full_ports import FULL_PORTS_DICT
 from dictionaries.custom_ports import CUSTOM_PORTS_DICT
 from dictionaries.mail_services import MAIL_SERVICES
 from dictionaries.services   import SERVICES
-from utils import mx_id, get_domains_from_csv, mx_record_check, get_cname_record, port_scan, get_a_record, load_wordlist, is_valid_subdomain, get_http_status, cname_check, check_cname_exists_in_services, check_service_status
+from utils import mx_in_service_main, mx_record_check_main, get_domains_from_csv, mx_record_check, mx_in_service, get_cname_record, port_scan, get_a_record, load_wordlist, is_valid_subdomain, get_http_status, cname_check, check_cname_exists_in_services, check_service_status
 from parse_args import parse_arguments
 
 def main():
@@ -35,7 +35,7 @@ def main():
     print(colored(f'''
    [*] By CyberSec-Angus
    [*] github.com/cybersec-angus
-   [*] Version 2.0.0
+   [*] Version 2.0.1
         ''', "green"))
     print(colored(f'''
    [*] Starting my Submarine
@@ -50,17 +50,20 @@ def main():
         print(f"[INFO] Scanning domain(s): {domains}")
     def scan_and_notify():
         # vulnerabilities = []
-        for domain in domains:
+        for domain in domains: 
             main_domain_a_record = get_a_record(domain)
             main_domain_cname = get_cname_record(domain)
+            service, mx_value = mx_in_service_main(domain)
             print(f"[INFO] Main domain A record: {main_domain_a_record}")
             print(f"[INFO] Main domain CNAME record: {main_domain_cname}")
             if args.mail_id:
-                mx_record = mx_record_check(domain)
-                mx_id = mx_id(domain)
-                #mx_id = mx_id(mx_record, MAIL_SERVICES)
-                
-                print(f"[INFO] MX record: {mx_record} | Mail provider: {mx_id}")
+                mx_record = mx_record_check_main(domain)
+                if service != None:
+                    print(colored(f"[MAIL] MX record: {mx_record} | Mail provider: {service}", "light_green"))
+                elif mx_record != False:
+                   print(colored(f"[MAIL] MX record found: {mx_record} | Unable to identify mail provider", "light_yellow"))
+                else:
+                   print(colored(f"[MAIL] No MX record found for {subdomain}", "light_red"))
             if args.port_scan:
                     if args.quick_port_scan:
                         # Defines the wordlist to scan the common ports, as per the above dictionary
@@ -96,7 +99,15 @@ def main():
                 # Outputs the subdomain being attempted if verbose is enabled
                 if args.verbose:
                     print(f"[INFO] Trying {subdomain}")
-
+                if args.mail_id:
+                    service, mx_value = mx_in_service(subdomain)
+                    mx_record = mx_record_check(subdomain)
+                    if service != None:
+                        print(colored(f"[MAIL] MX record: {mx_record} | Mail provider: {service}", "light_green"))
+                    elif mx_record != False:
+                            print(colored(f"[MAIL] MX record found: {mx_record} | Unable to identify mail provider", "light_yellow"))
+                    else:
+                        print(colored(f"[MAIL] No MX record found for {subdomain}", "light_red"))
                 if args.port_scan:
                     if args.quick_port_scan:
                         # Defines the wordlist to scan the common ports, as per the above dictionary
@@ -128,7 +139,7 @@ def main():
                 if args.verbose and status_code == 200:
                     print(f"[INFO] Found {subdomain} with status code: {status_code}")
                 elif args.verbose and status_code != 200:
-                    print(f"[INFO] Attempted a HTTP(S) connection to {subdomain} | Returned status code: {status_code} | This does not always mean the subdomain is invalid.")
+                    print(colored(f"[INFO] Attempted a HTTP(S) connection to {subdomain} | Returned status code: {status_code} | This does not always mean the subdomain is invalid.", "light_yellow"))
                 # Checks the A records, and the CNAME records of the subdomains and defines them
                 subdomain_a_record = get_a_record(subdomain)
                 service, cname_value = cname_check(subdomain)
@@ -146,7 +157,7 @@ def main():
                         else:
                             print(colored(f"[POTENTIAL] Subdomain [{subdomain}] CNAME is the main domain: {main_domain_a_record} | Status code: {status_code}", "yellow"))
                     elif cname_value is not None and status_code == 200:
-                        print(colored(f"[SUBDOMAIN] Found subdomain {subdomain} with CNAME record {cname_value}", "green"))
+                        print(colored(f"[SUBDOMAIN] Found subdomain {subdomain} with CNAME record {cname_value} | Status code: {status_code}", "green"))
                     elif subdomain_a_record == main_domain_a_record and status_code == 200:
                         if args.ignore_same:
                             continue
@@ -158,7 +169,7 @@ def main():
                         else:
                             print(colored(f"[POTENTIAL] Subdomain [{subdomain}] A record is the same as main domain: {main_domain_a_record} | Status code: {status_code}", "yellow"))
                     elif subdomain_a_record is not None and status_code == 200:
-                        print(colored(f"[SUBDOMAIN] Found subdomain {subdomain} with A record: {subdomain_a_record}", "green"))
+                        print(colored(f"[SUBDOMAIN] Found subdomain {subdomain} with A record: {subdomain_a_record} | Status code: {status_code}", "green"))
                     elif cname_value is not None and status_code != 200:
                         print(colored(f"[POTENTIAL] Subdomain {subdomain} with CNAME record {cname_value} | Status code: {status_code}", "yellow"))
                     elif subdomain_a_record is not None and status_code != 200:
@@ -167,19 +178,19 @@ def main():
                 if args.id:
                     if service:
                         if check_cname_exists_in_services(url):
-                            print(colored(f"[SERVICE FOUND] {subdomain} pointing to {service} | Response code: {status_code}", "green"))
+                            print(colored(f"[SERVICE FOUND] {subdomain} pointing to {service} | Status code: {status_code}", "green"))
                         elif cname_value == domain:
                             if args.ignore_same:
                                 continue
                             else:
-                                print(colored(f"[POTENTIAL] {subdomain} pointing to the main domain {domain} | Response code: {status_code}", "yellow"))
+                                print(colored(f"[POTENTIAL] {subdomain} pointing to the main domain {domain} | Status code: {status_code}", "yellow"))
                         elif cname_value is not None and status_code != 200:
                             if not check_cname_exists_in_services(cname_value, SERVICES):
-                                print(colored(f"[POTENTIAL] {subdomain} pointing to {service} with CNAME: {cname_value}", "yellow"))
+                                print(colored(f"[POTENTIAL] {subdomain} pointing to {service} with CNAME: {cname_value} | Status code: {status_code}", "yellow"))
                             if check_cname_exists_in_services(cname_value, SERVICES):
-                                print(colored(f"[POTENTIAL] {subdomain} pointing to unknown service with CNAME: {cname_value}", "yellow"))
+                                print(colored(f"[POTENTIAL] {subdomain} pointing to unknown service with CNAME: {cname_value} | Status code: {status_code}", "yellow"))
                         elif subdomain_a_record is not None and status_code == 200:
-                            print(colored(f"[SUBDOMAIN] Found subdomain {subdomain} with A record: {subdomain_a_record}", "green"))
+                            print(colored(f"[SUBDOMAIN] Found subdomain {subdomain} with A record: {subdomain_a_record} | Status code: {status_code}", "green"))
                         elif cname_value is not None and status_code != 200:
                             print(colored(f"[POTENTIAL] Subdomain {subdomain} with CNAME record {cname_value} | Status code: {status_code}", "yellow"))
                         elif subdomain_a_record is not None and status_code != 200:
@@ -189,7 +200,7 @@ def main():
                             if args.ignore_same:
                                 continue
                             else:
-                                print(colored(f"[POTENTIAL] Subdomain [{subdomain}] A record is the same as main domain: {main_domain_a_record} | Response code: {status_code}", "yellow"))
+                                print(colored(f"[POTENTIAL] Subdomain [{subdomain}] A record is the same as main domain: {main_domain_a_record} | Status code: {status_code}", "yellow"))
                         elif cname_value is not None:
                             print(colored(f"[NON RESOLVE] Subdomain {subdomain} with CNAME record {cname_value} | Status code: {status_code}", "red"))
                         elif subdomain_a_record is not None:
