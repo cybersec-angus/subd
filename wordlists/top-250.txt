@@ -1,3 +1,5 @@
+splunk.labs
+cloud
 www
 mail
 blog
