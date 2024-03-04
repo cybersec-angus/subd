@@ -26,6 +26,8 @@ This script requires the following packages:
 -   smtplib
 -   dnspython
 -   requests
+-   Paramiko
+
 
 ## Usage
 
@@ -129,7 +131,7 @@ This command will use the specified wordlist, scan the domain `example.com`, ena
 | What can hijacked subdomains be used for? | Hijacked domains are primarily used for phishing campaigns and cookie harvesting, as the authentic-looking subdomain can trick victims into revealing sensitive information. |
 
 #### Future features to be added/fixed:
-Within the next 6 months, I intend to implement the following features to make SUBD even better for everyone. 
+Within the next 12 months, I intend to implement the following features to make SUBD even better for everyone. 
  - API functionality - Will be really useful to be able to create custom web apps around the SUBD script. 
  - Increase dictionary size for services - have even more services to be identified
  - A record service identification - For example, if WordPress is running on a subdomain, the script will be able to identify the service using HTTP response signatures, and other information. 
