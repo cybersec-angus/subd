@@ -3,5 +3,5 @@ MAIL_SERVICES = {
     "Google Workspace": "*.google.com.",
     "Simplelogin": "*.simplelogin.co.",
     "Outlook": "*.outlook.com.",
-    "Zoho": "*.zoho.eu."
+    "Zoho": "mx.zoho.eu."
 }
