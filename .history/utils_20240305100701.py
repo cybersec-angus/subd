@@ -178,7 +178,7 @@ def mx_in_service(subdomain):
                         continue  # Subdomain does not match the prefix
                     if domain_parts[1] and not mx_value.endswith(domain_parts[1].lower()):
                         continue  # Subdomain does not match the suffix
-                    return service, mx_value
+                return service, mx_value
     except dns.resolver.NoAnswer:
         return None, None
     except dns.name.LabelTooLong:
@@ -209,6 +209,7 @@ def mx_in_service_main(domain):
                         continue  # Subdomain does not match the prefix
                     if domain_parts[1] and not mx_value.endswith(domain_parts[1].lower()):
                         continue  # Subdomain does not match the suffix
+
                     return service, mx_value
     except dns.resolver.NoAnswer:
         return None, None
