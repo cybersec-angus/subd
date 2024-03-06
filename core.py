@@ -3,11 +3,12 @@ import sys
 from termcolor import colored
 from dictionaries.takeover_urls import TAKEOVER_URLS
 from dictionaries.common_ports import COMMON_PORTS_DICT
-from dictionaries.full_ports import FULL_PORTS_DICT
+from dictionaries.extended_ports import FULL_PORTS_DICT
 from dictionaries.custom_ports import CUSTOM_PORTS_DICT
+from dictionaries.all_ports import ALL_PORTS_DICT
 from dictionaries.mail_services import MAIL_SERVICES
 from dictionaries.services   import SERVICES
-from utils import mx_in_service_main, mx_record_check_main, get_domains_from_csv, mx_record_check, mx_in_service, get_cname_record, port_scan, get_a_record, load_wordlist, is_valid_subdomain, get_http_status, cname_check, check_cname_exists_in_services, check_service_status
+from utils import mx_check_domain, get_domains_from_csv, mx_check, get_cname_record_domain, port_scan, get_a_record, load_wordlist, is_valid_subdomain, get_http_status, cname_check, check_cname_exists_in_services, check_service_status, get_a_record_domain, port_scan_domain
 from parse_args import parse_arguments
 
 def main():
@@ -35,7 +36,7 @@ def main():
     print(colored(f'''
    [*] By CyberSec-Angus
    [*] github.com/cybersec-angus
-   [*] Version 2.0.1
+   [*] Version 2.1.0
         ''', "green"))
     print(colored(f'''
    [*] Starting my Submarine
@@ -51,35 +52,40 @@ def main():
     def scan_and_notify():
         # vulnerabilities = []
         for domain in domains: 
-            main_domain_a_record = get_a_record(domain)
-            main_domain_cname = get_cname_record(domain)
-            service, mx_value = mx_in_service_main(domain)
+            main_domain_a_record = get_a_record_domain(domain)
+            main_domain_cname = get_cname_record_domain(domain)
+            service, mx_value = mx_check_domain(domain)
             print(f"[INFO] Main domain A record: {main_domain_a_record}")
             print(f"[INFO] Main domain CNAME record: {main_domain_cname}")
             if args.mail_id:
-                mx_record = mx_record_check_main(domain)
-                if service != None:
-                    print(colored(f"[MAIL] MX record: {mx_record} | Mail provider: {service}", "light_green"))
-                elif mx_record != False:
-                   print(colored(f"[MAIL] MX record found: {mx_record} | Unable to identify mail provider", "light_yellow"))
+                if mx_value == None:
+                    print(colored(f"[MAIL] No MX record found for {subdomain}", "light_red"))
+                elif service != None:
+                    print(colored(f"[MAIL] MX record found: {mx_value} | Mail provider: {service}", "light_green"))
+                elif mx_value != None:
+                   print(colored(f"[MAIL] MX record found: {mx_value} | Unable to identify mail provider", "light_yellow"))
                 else:
                    print(colored(f"[MAIL] No MX record found for {subdomain}", "light_red"))
             if args.port_scan:
                     if args.quick_port_scan:
                         # Defines the wordlist to scan the common ports, as per the above dictionary
-                        open_ports = port_scan(domain, COMMON_PORTS_DICT)
+                        open_ports = port_scan_domain(domain, COMMON_PORTS_DICT)
                         PORTS_DICT = COMMON_PORTS_DICT
-                    elif args.full_port_scan:
+                    elif args.extended_port_scan:
                         # Defines the wordlist to scan all the common ports and the remaining ports, as per the above FULL_PORTS dictionary
-                        open_ports = port_scan(domain, FULL_PORTS_DICT)
+                        open_ports = port_scan_domain(domain, FULL_PORTS_DICT)
                         PORTS_DICT = FULL_PORTS_DICT
                     elif args.custom_port_scan:
                         # Defines the wordlist to scan all the common ports and the remaining ports, as per the above FULL_PORTS dictionary
-                        open_ports = port_scan(domain, CUSTOM_PORTS_DICT)
+                        open_ports = port_scan_domain(domain, CUSTOM_PORTS_DICT)
                         PORTS_DICT = CUSTOM_PORTS_DICT
+                    elif args.all_ports_scan:
+                        # Defines the wordlist to scan all the common ports and the remaining ports, as per the above FULL_PORTS dictionary
+                        open_ports = port_scan_domain(domain, ALL_PORTS_DICT)
+                        PORTS_DICT = ALL_PORTS_DICT
                     else:
                         # Defines the wordlist to scan all the common ports, as per the above dictionary in the event that the user does not select a port scan type
-                        open_ports = port_scan(domain, COMMON_PORTS_DICT)
+                        open_ports = port_scan_domain(domain, COMMON_PORTS_DICT)
                         PORTS_DICT = COMMON_PORTS_DICT
                     open_ports_dict = {port: common_name for port, common_name in PORTS_DICT.items() if port in open_ports}
                     # Defines the details of the open ports, and outputs them to the console
@@ -100,12 +106,13 @@ def main():
                 if args.verbose:
                     print(f"[INFO] Trying {subdomain}")
                 if args.mail_id:
-                    service, mx_value = mx_in_service(subdomain)
-                    mx_record = mx_record_check(subdomain)
-                    if service != None:
-                        print(colored(f"[MAIL] MX record: {mx_record} | Mail provider: {service}", "light_green"))
-                    elif mx_record != False:
-                            print(colored(f"[MAIL] MX record found: {mx_record} | Unable to identify mail provider", "light_yellow"))
+                    service, mx_value = mx_check(subdomain)
+                    if mx_value == None:
+                        print(colored(f"[MAIL] No MX record found for {subdomain}", "light_red"))
+                    elif service != None:
+                        print(colored(f"[MAIL] MX record found: {mx_value} | Mail provider: {service}", "light_green"))
+                    elif mx_value != False:
+                            print(colored(f"[MAIL] MX record found: {mx_value} | Unable to identify mail provider", "light_yellow"))
                     else:
                         print(colored(f"[MAIL] No MX record found for {subdomain}", "light_red"))
                 if args.port_scan:
@@ -113,7 +120,7 @@ def main():
                         # Defines the wordlist to scan the common ports, as per the above dictionary
                         open_ports = port_scan(subdomain, COMMON_PORTS_DICT)
                         PORTS_DICT = COMMON_PORTS_DICT
-                    elif args.full_port_scan:
+                    elif args.extended_port_scan:
                         # Defines the wordlist to scan all the common ports and the remaining ports, as per the above FULL_PORTS dictionary
                         open_ports = port_scan(subdomain, FULL_PORTS_DICT)
                         PORTS_DICT = FULL_PORTS_DICT
@@ -121,6 +128,10 @@ def main():
                         # Defines the wordlist to scan all the common ports and the remaining ports, as per the above FULL_PORTS dictionary
                         open_ports = port_scan(subdomain, CUSTOM_PORTS_DICT)
                         PORTS_DICT = CUSTOM_PORTS_DICT
+                    elif args.all_ports_scan:
+                        # Defines the wordlist to scan all the common ports and the remaining ports, as per the above FULL_PORTS dictionary
+                        open_ports = port_scan(subdomain, ALL_PORTS_DICT)
+                        PORTS_DICT = ALL_PORTS_DICT
                     else:
                         # Defines the wordlist to scan all the common ports, as per the above dictionary in the event that the user does not select a port scan type
                         open_ports = port_scan(subdomain, COMMON_PORTS_DICT)

@@ -74,7 +74,21 @@ def cname_check(subdomain):
         return None, None
     return None, None
 
-# Port scan for the domains - Activated with the -ps argument
+# Checks the A record for the domain
+def get_a_record(subdomain):
+    try:
+        answers = dns.resolver.resolve(subdomain, "A")
+        for answer in answers:
+            return str(answer.address)
+    except dns.resolver.NoAnswer:
+        return None
+    except dns.name.LabelTooLong:
+        print(f"[WARNING] {subdomain} has a label longer than 63 octets. Skipping this domain.")
+        return None
+    except Exception as e:
+        return None
+
+# Port scan for subbdomains - Activated with the -ps argument
 def port_scan(subdomain, ports):
     open_ports = []
     for port in ports:
@@ -91,35 +105,6 @@ def port_scan(subdomain, ports):
             pass
     return open_ports
 
-
-# Checks the A record for the domain
-def get_a_record(domain):
-    try:
-        answers = dns.resolver.resolve(domain, "A")
-        for answer in answers:
-            return str(answer.address)
-    except dns.resolver.NoAnswer:
-        return None
-    except dns.name.LabelTooLong:
-        print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping this domain.")
-        return None
-    except Exception as e:
-        return None
-
-# Checks the CNAME value of the main domain. This is used for the output of when the script is launched.
-def get_cname_record(domain):
-    try:
-        answers = dns.resolver.resolve(domain, "CNAME")
-        for answer in answers:
-            return str(answer.address)
-    except dns.resolver.NoAnswer:
-        return None
-    except dns.name.LabelTooLong:
-        print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping this domain.")
-        return None
-    except Exception as e:
-        return None
-
 # Checks if the CNAME value is apart of the dictionary of services
 def check_cname_exists_in_services(cname_value, services):
     for service in SERVICES.values():
@@ -127,40 +112,8 @@ def check_cname_exists_in_services(cname_value, services):
             return True
     return False
 
-mx_record_domain = None
 
-def mx_record_check_main(domain):
-    try:
-        answers = dns.resolver.resolve(domain, "MX")
-        if len(answers) > 0:
-            return answers[0]
-        else:
-            return False
-    except dns.resolver.NoAnswer:
-        return False
-    except dns.name.LabelTooLong:
-        print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping.")
-        return False
-    except:
-        return False
-
-def mx_record_check(subdomain):
-    try:
-        answers = dns.resolver.resolve(subdomain, "MX")
-        if len(answers) > 0:
-            return answers[0]
-        else:
-            return False
-    except dns.resolver.NoAnswer:
-        return False
-    except dns.name.LabelTooLong:
-        print(f"[WARNING] {subdomain} has a label longer than 63 octets. Skipping.")
-        return False
-    except:
-        return False
-
-
-def mx_in_service(subdomain):
+def mx_check(subdomain):
     try:
         answers = dns.resolver.resolve(subdomain, "MX")
         for answer in answers:
@@ -190,7 +143,35 @@ def mx_in_service(subdomain):
         return None, None
     return None, None
 
-def mx_in_service_main(domain):
+# checks the status of the service at the end of the CNAME, and then checks if the HTML pattern is apart of the HTML dictionary
+def check_service_status(url):
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 404:
+            for service, html_pattern in INACTIVE_SERVICE_HTML.items():
+                if html_pattern in response.text:
+                    return True
+    except requests.exceptions.RequestException:
+        return False
+    return False
+
+def port_scan_domain(domain, ports):
+    open_ports = []
+    for port in ports:
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(3)
+            result = sock.connect_ex((domain, port))
+            if result == 0:
+                open_ports.append(port)
+            else:
+                pass
+            sock.close()
+        except socket.error:
+            pass
+    return open_ports
+
+def mx_check_domain(domain):
     try:
         answers = dns.resolver.resolve(domain, "MX")
         for answer in answers:
@@ -221,14 +202,48 @@ def mx_in_service_main(domain):
         return None, None
     return None, None
 
-# checks the status of the service at the end of the CNAME, and then checks if the HTML pattern is apart of the HTML dictionary
-def check_service_status(url):
+
+mx_record_domain = None
+
+def mx_record_check_domain(domain):
     try:
-        response = requests.get(url, timeout=10)
-        if response.status_code == 404:
-            for service, html_pattern in INACTIVE_SERVICE_HTML.items():
-                if html_pattern in response.text:
-                    return True
-    except requests.exceptions.RequestException:
+        answers = dns.resolver.resolve(domain, "MX")
+        if len(answers) > 0:
+            return answers[0]
+        else:
+            return False
+    except dns.resolver.NoAnswer:
         return False
-    return False
+    except dns.name.LabelTooLong:
+        print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping.")
+        return False
+    except:
+        return False
+    
+# Checks the A record for the domain
+def get_a_record_domain(domain):
+    try:
+        answers = dns.resolver.resolve(domain, "A")
+        for answer in answers:
+            return str(answer.address)
+    except dns.resolver.NoAnswer:
+        return None
+    except dns.name.LabelTooLong:
+        print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping this domain.")
+        return None
+    except Exception as e:
+        return None
+
+# Checks the CNAME value of the main domain. This is used for the output of when the script is launched.
+def get_cname_record_domain(domain):
+    try:
+        answers = dns.resolver.resolve(domain, "CNAME")
+        for answer in answers:
+            return str(answer.address)
+    except dns.resolver.NoAnswer:
+        return None
+    except dns.name.LabelTooLong:
+        print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping this domain.")
+        return None
+    except Exception as e:
+        return None

@@ -77,7 +77,8 @@ To run the script, execute the following command from the install directory:
 |Argument|Description  |
 |--|--|
 | -qs, --quick-port-scan | Quick port scan of the top 22 most common ports. Includes HTTPS, HTTP, SSH, Telnet, etc. See below for more details. |
-| -fs, --full-port-scan | Full port scan of the top 145 ports used on web servers. Note: This will take a while. It is recommended to let it do its thing and return later,  especially with a long wordlist.|
+| -es, --extended-port-scan | Extended port scan of the top 145 ports used on web servers. Note: This will take a while. It is recommended to let it do its thing and return later,  especially with a long wordlist.|
+| -as, --all-ports-scan | Full port scan of the entire range of ports available. Note: This will an awfully long time to run, but may be useful for specific use cases. It is also VERY noisy for a network. Use with caution. It is recommended to let it do its thing and return later,  especially with a long wordlist.|
 | -cs, --custom-port-scan |Uses the custom port dictionary file `/dictionaries/custom_ports.py` This is useful for two reasons - A) Targeted recon, where you have specific ports to test for, for example, Splunk. B) Where you want to reduce the execution time, and therefore a limited number of ports is beneficial.|
 #### Additional Arguments
 |Argument|Description  |
@@ -213,6 +214,7 @@ Subd follows the Semantic Versioning system for version releases. This means tha
 	- Will port scan the root domain and subdomains when port scanning is enabled - Previously, it would only scan any subdomains, now it also scans the root domain first.  
 	- Added additional info to the help menu, as well as changing a few colours and texts on the CLI interface. 
 - Version 2.0.1 - Fixed the issues previously mentioned in the break log around the mail identification function not working.
+- Version 2.1.0 - Slight refactor of code to make it more efficient. I also have added an additional scan type for the port scan function. This allows you to scan the entire range of ports, as per RFC-6335. 
 # Disclaimer
 This script is intended for educational and lawful use only. It should only be used with the explicit permission of the domain owner or within the guidelines of a bug bounty program that permits the use of such tools. The developer of this script is not responsible or liable for any misuse or damage resulting from the improper use of this script. Before using this script in a bug bounty program, please ensure that the program's rules and guidelines allow its use. Use this script responsibly and ethically.
 

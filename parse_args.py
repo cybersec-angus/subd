@@ -58,8 +58,10 @@ def parse_arguments():
 
     scan_group = parser.add_mutually_exclusive_group(required=False)
     scan_group.add_argument("-qs", "--quick-port-scan", help="Quick port scan, of the top 20 most common ports.", action="store_true")
-    scan_group.add_argument("-fs", "--full-port-scan", help="Full port scan of the top 100 ports used on web servers. This will take a while. ", action="store_true")
+    scan_group.add_argument("-es", "--extended-port-scan", help="Full port scan of the top 100 ports used on web servers. This will take a while. ", action="store_true")
+    scan_group.add_argument("-as", "--all-ports-scan", help="This will scan the domain and subdomains for every single port to exist. This list was taken direct from IANA RFC-6335. Be certain you want to scan every port, as this will take ages and is very noisy on a network.", action="store_true")
     scan_group.add_argument("-cs", "--custom-port-scan", help="This will use the custom port dictionary, found in the file custom_ports.py. This is useful if you have a specific set of ports you want to tests on hosts, but don't want to alter the other dictionaries.", action="store_true")
+
 
     # Add the remaining arguments
     #parser.add_argument("--email-server", help="SMTP server for sending email notifications")
