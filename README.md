@@ -28,16 +28,20 @@ Use Subd! and scan for potentially vulnerable subdomains. It is also worth keepi
 ## Installation
 Subd is really easy to install and get started with:
 <br>
+<br>
 Step 1:
 `git clone https://github.com/cybersec-angus/subd/`
 <br>
+<br>
 Step 2:
 `cd subd/`
+<br>
 <br>
 Step 3: Install the required dependencies, run:
 `pip install -r requirements.txt` 
 or 
 `pip3 install -r requirements.txt` 
+<br>
 <br>
 This script requires the following packages:
 -   schedule
