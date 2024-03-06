@@ -30,8 +30,10 @@ Subd is really easy to install and get started with:
 <br>
 Step 1:
 `git clone https://github.com/cybersec-angus/subd/`
+<br>
 Step 2:
 `cd subd/`
+<br>
 Step 3: Install the required dependencies, run:
 `pip install -r requirements.txt` 
 or 
