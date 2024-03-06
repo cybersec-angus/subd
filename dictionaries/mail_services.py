@@ -14,6 +14,5 @@ MAIL_SERVICES = {
     "Runbox": "*.runbox.com.",
     "Kolabnow": "*.kolabnow.com.",
     "Mailbox.org": "*.mailbox.org.",
-    "Protonmail": "*.protonmail.ch.",
-
+    "Protonmail": "*.protonmail.ch."
 }
