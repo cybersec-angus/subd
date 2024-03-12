@@ -83,8 +83,8 @@ To run the script, execute the following command from the install directory:
 #### Additional Arguments
 |Argument|Description  |
 |--|--|
-| -sc, --schedule | Schedule scans to repeat. Value is a number in minutes. Should be used with a --interval argument unless you want to use the default interval of 60 mins. |
-| --interval | Scan interval in minutes (As above, default: 60) |
+| -sc, --schedule | Schedule scans to repeat. Value is a number in minutes. Should be used with a --interval (-in) argument unless you want to use the default interval of 60 mins. |
+| -in, --interval | Scan interval in minutes (As above, default: 60) |
 
 ## Examples
 #### Example 1:
@@ -164,7 +164,6 @@ This command will use the specified wordlist, scan the domain `example.com`, ena
 ## Break log (stuff that is currently broken):
 Unfortunately, some parts of the script are broken, for a few different reasons. These are either due to me needing to fix something else first, or simply not having the time to fix it yet. So far, I am aware of the following things that are broken:
 
- - When trying to use scan multiple domains, it will scan the first one and exit the script. This is a simple fix, that I just need to get round to sorting
  - Errors aren't handled, which means that the script will close if there's things like an invalid wordlist file
  - The mail sending functionality doesn't work
 
@@ -172,7 +171,7 @@ Unfortunately, some parts of the script are broken, for a few different reasons.
 The following features are on my radar to implement and improve over the next few months. See the below timeline (This is from the beginning of March, 2024):
 #### 0-3 months:
  - Fix outstanding issues, as per the Break Log
- - Implement connection validation tests, based on the output of the port scan. This will be most beneficial for things like DNS, where the port may be open but the server is not able to resolve DNS queries (for example a DNS server that only accepts queries from specific IP ranges. The tests have (mostly) been written, and the functionality just needs adding to the relevent functions in `utils.py` and `core.py`
+ - Implement connection validation tests, based on the output of the port scan. This will be most beneficial for things like DNS, where the port may be open but the server is not able to resolve DNS queries (for example a DNS server that only accepts queries from specific IP ranges. The tests have (mostly) been written, and the functionality just needs adding to the relevant functions in `utils.py` and `core.py`
  - Increase dictionary size for services - have even more services to be identified
  - A record service identification - For example, if WordPress is running on a subdomain, the script will be able to identify the service using, HTML signatures, HTTP response signatures, and other information. 
  - Ability to use a proxy for when HTTP requests are sent, for example with the `get_http_status` function
@@ -213,8 +212,12 @@ Subd follows the Semantic Versioning system for version releases. This means tha
 	- Added the ability to suppress results where the subdomain points to the same A record or CNAME value as the main domain. This is especially useful for hosting providers that attempt to block enumeration efforts by having a wildcard subdomain pointing to the same A record as the root domain. Also useful if the main domain has an A record of `None` so that you don't get loads of false positives
 	- Will port scan the root domain and subdomains when port scanning is enabled - Previously, it would only scan any subdomains, now it also scans the root domain first.  
 	- Added additional info to the help menu, as well as changing a few colours and texts on the CLI interface. 
-- Version 2.0.1 - Fixed the issues previously mentioned in the break log around the mail identification function not working.
-- Version 2.1.0 - Slight refactor of code to make it more efficient. I also have added an additional scan type for the port scan function. This allows you to scan the entire range of ports, as per RFC-6335. 
+- Version 2.0.1:
+  - Fixed the issues previously mentioned in the break log around the mail identification function not working.
+- Version 2.1.0:
+   - Slight refactor of code to make it more efficient. I also have added an additional scan type for the port scan function. This allows you to scan the entire range of ports, as per RFC-6335.
+- Version 2.1.1:
+  - Fixed issue surrounding not being able to scan multiple domains as well as the schedule. Now, the tool is able to scan multiple domains separated with a comma (E.G: website1.com,website2.com NOTE: This does NOT work if there is a space between the comma and the next domain. )
 # Disclaimer
 This script is intended for educational and lawful use only. It should only be used with the explicit permission of the domain owner or within the guidelines of a bug bounty program that permits the use of such tools. The developer of this script is not responsible or liable for any misuse or damage resulting from the improper use of this script. Before using this script in a bug bounty program, please ensure that the program's rules and guidelines allow its use. Use this script responsibly and ethically.
 

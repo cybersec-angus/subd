@@ -70,6 +70,6 @@ def parse_arguments():
     #parser.add_argument("--email-password", help="SMTP server password")
     #parser.add_argument("--require-ssl", help="Require SSL for sending email notifications.", action="store_true")
     parser.add_argument("-sc", "--schedule", help="Runs in addition to the --interval argument. You can schedule scans, which will be outputted to the command line. ", action="store_true")
-    parser.add_argument("--interval", type=int, help="Scan interval in minutes", default=60)
+    parser.add_argument("-in", "--interval", type=int, help="Scan interval in minutes", default=60)
     args = parser.parse_args()
     return args

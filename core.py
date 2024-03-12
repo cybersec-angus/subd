@@ -36,7 +36,7 @@ def main():
     print(colored(f'''
    [*] By CyberSec-Angus
    [*] github.com/cybersec-angus
-   [*] Version 2.1.0
+   [*] Version 2.1.1
         ''', "green"))
     print(colored(f'''
    [*] Starting my Submarine
@@ -55,8 +55,9 @@ def main():
             main_domain_a_record = get_a_record_domain(domain)
             main_domain_cname = get_cname_record_domain(domain)
             service, mx_value = mx_check_domain(domain)
-            print(f"[INFO] Main domain A record: {main_domain_a_record}")
-            print(f"[INFO] Main domain CNAME record: {main_domain_cname}")
+            print(colored(f"[INFO] Now scanning domain: {domain}", "light_magenta"))
+            print(colored(f"[INFO] A record for ({domain}): {main_domain_a_record}",  "light_magenta"))
+            print(colored(f"[INFO] CNAME record for: ({domain}): {main_domain_cname}",  "light_magenta"))
             if args.mail_id:
                 if mx_value == None:
                     print(colored(f"[MAIL] No MX record found for {subdomain}", "light_red"))
@@ -276,32 +277,16 @@ def main():
             #   message_body = "Domain Takeover Vulnerabilities Found:\n\n" + "\n".join(vulnerabilities)
             #   send_email_notification(args.email, args.email_server, args.email_port, args.email_user, args.email_password, message_body, args.require_ssl)
             # Schedule feature to re-run the script after a set interval
-            if args.schedule:
-                interval = args.interval
-                print(f"[INFO] Starting script again after interval {interval}")
-                if args.interval:
-                    time.sleep(args.interval * 60)
-                    interval = args.interval
-                    print(f"[INFO] Starting script again now")
-                else:
-                    print(f"[EXITING] No schedule set or an error occured")
-                    sys.exit(0)
-            else:
-                print(colored(f"[EXITING] Scan complete | Exiting SUBD.py | See output above for results", "green"))
-                sys.exit(0)
-        #if vulnerabilities and args.email:
-        #        message_body = "Domain Takeover Vulnerabilities Found:\n\n" + "\n".join(vulnerabilities)
-        #        send_email_notification(args.email, args.email_server, args.email_port, args.email_user, args.email_password, message_body, args.require_ssl)
+    while True:
+        scan_and_notify()
 
         if args.schedule:
-                if args.interval:
-                    time.sleep(args.interval * 60)
-                    scan_and_notify()
-                else:
-                    print(f"[EXITING] No schedule set or an error occured. See output for more details")
-                    sys.exit(0)
+            interval = args.interval
+            if interval == 1:
+                print(colored(f"[WAITING] Scan complete | Will scan again after {interval} minute", "green"))
+            else:
+                print(colored(f"[WAITING] Scan complete | Will scan again after {interval} minutes", "green"))
+            time.sleep(args.interval * 60) 
         else:
-            print(colored(f"[EXITING] Scan complete | Exiting SUBD.py | See output above for results", "green"))
-            sys.exit(0)
-        sys.exit(0)
-    scan_and_notify()
+            break
+    print(colored("[EXITING] Scan complete", "green"))
