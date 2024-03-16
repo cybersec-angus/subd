@@ -18,8 +18,6 @@ def is_valid_subdomain(subdomain):
 
 
 def load_wordlist(wordlist_file):
-    if not os.path.exists(wordlist_file):
-        print(colored(f"[ERROR] Wordlist file {wordlist_file} does not exist | EXITING", "red"))
     with open(wordlist_file, "r", encoding="ISO-8859-1") as f:
         return [line.strip() for line in f.readlines()]
 
@@ -71,6 +69,7 @@ def cname_check(subdomain):
     except dns.resolver.NXDOMAIN:
         return None, None
     except Exception as e:
+        print(colored(f"[ERROR] Unhandled error: {e} | Continuing", "light_red"))
         return None, None
     return None, None
 
@@ -82,10 +81,13 @@ def get_a_record(subdomain):
             return str(answer.address)
     except dns.resolver.NoAnswer:
         return None
+    except dns.resolver.NXDOMAIN:
+        return None
     except dns.name.LabelTooLong:
         print(f"[WARNING] {subdomain} has a label longer than 63 octets. Skipping this domain.")
         return None
     except Exception as e:
+
         return None
 
 # Port scan for subbdomains - Activated with the -ps argument
@@ -101,7 +103,8 @@ def port_scan(subdomain, ports):
             else:
                 pass
             sock.close()
-        except socket.error:
+        except socket.error as e:
+            print(colored(f"[PORT SCAN ERROR] Unhandled socket error: {e} | Continuing", "light_red"))
             pass
     return open_ports
 
@@ -140,6 +143,7 @@ def mx_check(subdomain):
     except dns.resolver.NXDOMAIN:
         return None, None
     except Exception as e:
+        print(colored(f"[ERROR] Unhandled error: {e} | Continuing", "light_red"))
         return None, None
     return None, None
 
@@ -167,7 +171,8 @@ def port_scan_domain(domain, ports):
             else:
                 pass
             sock.close()
-        except socket.error:
+        except socket.error as e:
+            print(colored(f"[PORT SCAN ERROR] Unhandled socket error: {e} | Continuing", "light_red"))
             pass
     return open_ports
 
@@ -199,6 +204,7 @@ def mx_check_domain(domain):
     except dns.resolver.NXDOMAIN:
         return None, None
     except Exception as e:
+        print(colored(f"[ERROR] Unhandled error: {e} | Continuing", "light_red"))
         return None, None
     return None, None
 
@@ -214,6 +220,8 @@ def mx_record_check_domain(domain):
             return False
     except dns.resolver.NoAnswer:
         return False
+    except dns.resolver.NXDOMAIN:
+        return False
     except dns.name.LabelTooLong:
         print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping.")
         return False
@@ -226,12 +234,17 @@ def get_a_record_domain(domain):
         answers = dns.resolver.resolve(domain, "A")
         for answer in answers:
             return str(answer.address)
+    except dns.resolver.NXDOMAIN:
+        print (colored(f"[WARNING] {domain} Does NOT exist | EXITING.", 'light_red'))
+        exit(0)
     except dns.resolver.NoAnswer:
+        print (f"[WARNING] No A record found for {domain}.")
         return None
     except dns.name.LabelTooLong:
         print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping this domain.")
         return None
     except Exception as e:
+        print(colored(f"[ERROR] Unhandled error: {e} | Continuing", "light_red"))
         return None
 
 # Checks the CNAME value of the main domain. This is used for the output of when the script is launched.
@@ -242,8 +255,11 @@ def get_cname_record_domain(domain):
             return str(answer.address)
     except dns.resolver.NoAnswer:
         return None
+    except dns.resolver.NXDOMAIN:
+        return None
     except dns.name.LabelTooLong:
         print(f"[WARNING] {domain} has a label longer than 63 octets. Skipping this domain.")
         return None
     except Exception as e:
+        print(colored(f"[ERROR] Unhandled error: {e} | Continuing", "light_red"))
         return None

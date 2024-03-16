@@ -86,6 +86,19 @@ To run the script, execute the following command from the install directory:
 | -sc, --schedule | Schedule scans to repeat. Value is a number in minutes. Should be used with a --interval (-in) argument unless you want to use the default interval of 60 mins. |
 | -in, --interval | Scan interval in minutes (As above, default: 60) |
 
+### Outputs from the tool
+|Output|Description  |
+|--|--|
+| [POTENTIAL] | This means that a potential subdomain or hi-jackable subdomain has been found. This may be because a DNS record exists, but the response code is not 2xx. These will be coloured Cyan. |
+| [SUBDOMAIN] | This means that a subdomain has been found and is working as expected (responding with 2xx response code, for example). This is coloured Green.|
+| [VULNERABLE] | This means that a subdomain that is vulnerable to hijacking has been found. These will be coloured green. |
+| [INFO] | This is the output from the verbose argument, and provides information on what has been attempted. This is coloured Magenta. |
+| [MAIL] | This is the output of the mail ID feature. The coloured output varies on the response. A successful mail service identification is Green. An MX record being found but no service identified is Cyan. A failure to find an MX record is Yellow. An error is Red.|
+| [PORT SCAN] | This is the output of the port scan feature. The coloured output varies on the response. Ports that have been found are Green. An error is Red. |
+| [ERROR] | This is the output of any error the tool has encountered. In most cases, this is a handled error, but unhandled errors are also output with this, and then the error message. These are red. |
+
+
+
 ## Examples
 #### Example 1:
 To run a simple domain enumeration scan, with port scanning enabled, and verbose enabled:
@@ -164,7 +177,6 @@ This command will use the specified wordlist, scan the domain `example.com`, ena
 ## Break log (stuff that is currently broken):
 Unfortunately, some parts of the script are broken, for a few different reasons. These are either due to me needing to fix something else first, or simply not having the time to fix it yet. So far, I am aware of the following things that are broken:
 
- - Errors aren't handled, which means that the script will close if there's things like an invalid wordlist file
  - The mail sending functionality doesn't work
 
 ## Future plans and timeline:
@@ -218,6 +230,9 @@ Subd follows the Semantic Versioning system for version releases. This means tha
    - Slight refactor of code to make it more efficient. I also have added an additional scan type for the port scan function. This allows you to scan the entire range of ports, as per RFC-6335.
 - Version 2.1.1:
   - Fixed issue surrounding not being able to scan multiple domains as well as the schedule. Now, the tool is able to scan multiple domains separated with a comma (E.G: website1.com,website2.com NOTE: This does NOT work if there is a space between the comma and the next domain. )
+- Version 2.2.0:
+  - Added error handling, including for error handling when an invalid wordlist is entered, and an invalid domain. 
+  - Changed the colours of outputs, to make it easier to read the information you need at a glance.
 # Disclaimer
 This script is intended for educational and lawful use only. It should only be used with the explicit permission of the domain owner or within the guidelines of a bug bounty program that permits the use of such tools. The developer of this script is not responsible or liable for any misuse or damage resulting from the improper use of this script. Before using this script in a bug bounty program, please ensure that the program's rules and guidelines allow its use. Use this script responsibly and ethically.
 
