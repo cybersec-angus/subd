@@ -183,7 +183,6 @@ This command will use the specified wordlist, scan the domain `example.com`, ena
 ## Future plans and timeline:
 The following features are on my radar to implement and improve over the next few months. See the below timeline (This is from the beginning of March, 2024):
 #### 0-3 months:
- - Fix outstanding issues, as per the Break Log
  - Implement connection validation tests, based on the output of the port scan. This will be most beneficial for things like DNS, where the port may be open but the server is not able to resolve DNS queries (for example a DNS server that only accepts queries from specific IP ranges. The tests have (mostly) been written, and the functionality just needs adding to the relevant functions in `utils.py` and `core.py`
  - Increase dictionary size for services - have even more services to be identified
  - A record service identification - For example, if WordPress is running on a subdomain, the script will be able to identify the service using, HTML signatures, HTTP response signatures, and other information. 
