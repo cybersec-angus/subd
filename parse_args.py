@@ -45,10 +45,11 @@ def parse_arguments():
     parser.add_argument("-w", "--wordlist", help="Wordlist for subdomain enumeration", required=True)
     parser.add_argument("-d", "--domains", help="Domains (comma-separated) or CSV file", required=True)
     parser.add_argument("-v", "--verbose", help="Enable verbosity to show a detailed output of what is happening.", action="store_true")
-    #parser.add_argument("-e", "--email", help="Admin email to send notifications to. Can be used in conjunction with the", "action="store_true")
-    parser.add_argument("-ps", "--port-scan", help="Runs port scan on all subdomains that have either a CNAME or an A record. This will take a while, and will increase execution time considerbly. Will only output no ports when verbose. If you want to see scan failures, use the -v argument.", action="store_true")
-    parser.add_argument("-is", "--ignore-same", help="Will supress results where the DNS record of the subdomain and the main domain are the same.", action="store_true")
+    parser.add_argument("-e", "--email", help="Will send email of the results to the configured admin email. Edit the mail_config.py file to set this feature up.", action="store_true")
+    parser.add_argument("-ps", "--port-scan", help="Runs port scan on all subdomains that have either a CNAME or an A record. This will take a while, and will increase execution time considerably. Will only output no ports when verbose. If you want to see scan failures, use the -v argument.", action="store_true")
+    parser.add_argument("-is", "--ignore-same", help="Will suppress results where the DNS record of the subdomain and the main domain are the same.", action="store_true")
     parser.add_argument("-m", "--mail-id", help="Will output any MX records for the domain and subdomain, and attempt to match the MX records to an email provider based on the MX record", action="store_true")
+    parser.add_argument("-o", "--output", help="Output file name. If not specified, will not output to a file.", action="store")
 
     # Mutually exclusive group for the scan options
     scan_group = parser.add_mutually_exclusive_group(required=True)
@@ -62,13 +63,6 @@ def parse_arguments():
     scan_group.add_argument("-as", "--all-ports-scan", help="This will scan the domain and subdomains for every single port to exist. This list was taken direct from IANA RFC-6335. Be certain you want to scan every port, as this will take ages and is very noisy on a network.", action="store_true")
     scan_group.add_argument("-cs", "--custom-port-scan", help="This will use the custom port dictionary, found in the file custom_ports.py. This is useful if you have a specific set of ports you want to tests on hosts, but don't want to alter the other dictionaries.", action="store_true")
 
-
-    # Add the remaining arguments
-    #parser.add_argument("--email-server", help="SMTP server for sending email notifications")
-    #parser.add_argument("--email-port", type=int, help="SMTP server port")
-    #parser.add_argument("--email-user", help="SMTP server username")
-    #parser.add_argument("--email-password", help="SMTP server password")
-    #parser.add_argument("--require-ssl", help="Require SSL for sending email notifications.", action="store_true")
     parser.add_argument("-sc", "--schedule", help="Runs in addition to the --interval argument. You can schedule scans, which will be outputted to the command line. ", action="store_true")
     parser.add_argument("-in", "--interval", type=int, help="Scan interval in minutes", default=60)
     args = parser.parse_args()

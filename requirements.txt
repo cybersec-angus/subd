@@ -3,3 +3,4 @@ argparse
 dnspython
 requests
 paramiko
+smtplib

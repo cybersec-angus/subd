@@ -9,7 +9,8 @@ Subd is a cool and simple Python tool aimed at all different types of security f
  - Run port scans on all enumerated subdomains, with options for the most common 22 ports, the top 145 ports, or a custom dictionary of ports
  - Scans for MX records and attempts to identify mail providers based on a dictionary of MX records and their providers
  - Run scheduled scans periodically
- - Email results to an admin email*
+ - Email results to an admin email
+ - Output results to a txt file
 ## Introduction
 Public-facing attack surfaces are arguably one of the most important things to monitor and track, as they are the easiest parts of an IT estate to find and enumerate. One such part of a public attack surface is a companies domains, and subdomains. 
 #### A bit of info about DNS records
@@ -43,11 +44,13 @@ or
 `pip3 install -r requirements.txt` 
 <br>
 <br>
-This script requires the following packages:
+This script requires the following non-standard packages:
 -   schedule
 -   smtplib
 -   dnspython
 -   requests
+-   termcolor - To make it look pretty
+-   argparse
 -   paramiko - Used for the SSH connection tests*
 
 
@@ -61,11 +64,13 @@ To run the script, execute the following command from the install directory:
 |Argument|Description  |
 |--|--|
 | -w, --wordlist | Path to the wordlist for subdomain enumeration (required) |
-| -d, --domains | Domain(s) as either a single domain, multiple domains* (domain.com,domain2.com) or CSV file (required) |
+| -d, --domains | Domain(s) as either a single domain, multiple domains (domain.com,domain2.com) or CSV file (required) |
 | -v, --verbose | Enable verbose output |
 | -ps, --port-scan| Enables port scan on discovered subdomains |
 | -is, --ignore-same| Ignores results where the subdomain is pointing to the same A record or CNAME as the main domain. This is beneficial when your root domain has the record |
 | -m, --mail-id| Detects MX records, and attempts to identify the mail provider based on the (currently very limited) dictionary |
+| -e, --email| Once a scan has completed, it will email a copy of the results to the admin email, which is configured in `mail_config.py`, along with the other details needed to send emails. NOTE: In order for this to work, you will need access to send emails from an SMTP server. Some providers, such as Google, require you to use an application password. Consult your providers documentation for more info. This feature is really useful for long scans, or can be used in conjunction with scheduled scans (-sc) to send regular reports of subdomains.|
+| -o, --output| This specifies a file name/directory for a TXT file to output the scan results to. USAGE: -o results.txt - This is really useful to save results for later analysis or integration with other tools/systems.|
 
 #### Scan Options (Mutually Exclusive)
 |Argument|Description  |
@@ -93,9 +98,10 @@ To run the script, execute the following command from the install directory:
 | [SUBDOMAIN] | This means that a subdomain has been found and is working as expected (responding with 2xx response code, for example). This is coloured Green.|
 | [VULNERABLE] | This means that a subdomain that is vulnerable to hijacking has been found. These will be coloured green. |
 | [INFO] | This is the output from the verbose argument, and provides information on what has been attempted. This is coloured Magenta. |
-| [MAIL] | This is the output of the mail ID feature. The coloured output varies on the response. A successful mail service identification is Green. An MX record being found but no service identified is Cyan. A failure to find an MX record is Yellow. An error is Red.|
+| [MAIL] | This is the output of the mail ID feature (not the mail sending feature). The coloured output varies on the response. A successful mail service identification is Green. An MX record being found but no service identified is Cyan. A failure to find an MX record is Yellow. An error is Red.|
 | [PORT SCAN] | This is the output of the port scan feature. The coloured output varies on the response. Ports that have been found are Green. An error is Red. |
 | [ERROR] | This is the output of any error the tool has encountered. In most cases, this is a handled error, but unhandled errors are also output with this, and then the error message. These are red. |
+| [XXX ERROR] | This is the output of any error the tool has encountered, but specific to a specific module, such as port scanning. In most cases, this is a handled error, but unhandled errors are also output with this, and then the error message. These are red. |
 
 
 
@@ -174,11 +180,6 @@ This command will use the specified wordlist, scan the domain `example.com`, ena
 | What wordlists should I use? | The world is your oyster. There are loads of great wordlists out there, and it really depends on the purpose of your scanning. I have included three wordlists with this tool. 1) `all.txt` is an open-source wordlist that is used by a lot of enumeration tools and contains over 21mn potential subdomains. This will take ages to complete, so use sparingly. 2) `top-250.txt` a wordlist of the top 250 subdomains, based on the most common subdomains on webservers. 3) A template for testing purposes. |
 | How does Subd handle subdomains of subdomains? EG. `subd.home.example.com`| These are handled through the wordlist. If you are wanting to discover these, ensure that you have any potential versions of these in your wordlist. Using the example given, the wordlist would need to contain `subd.home` to get `subd.home.example.com`|
 
-## Break log (stuff that is currently broken):
-Unfortunately, some parts of the script are broken, for a few different reasons. These are either due to me needing to fix something else first, or simply not having the time to fix it yet. So far, I am aware of the following things that are broken:
-
- - The mail sending functionality doesn't work
-
 ## Future plans and timeline:
 The following features are on my radar to implement and improve over the next few months. See the below timeline (This is from the beginning of March, 2024):
 #### 0-3 months:
@@ -233,6 +234,14 @@ Subd follows the Semantic Versioning system for version releases. This means tha
 - Version 2.2.0:
   - Added error handling, including for error handling when an invalid wordlist is entered, and an invalid domain. 
   - Changed the colours of outputs, to make it easier to read the information you need at a glance.
+#### Version 3
+- Version 3.0.0:
+	- This version included the addition of the following files and functionality:
+		- `send_email.py` - In version 3.0.0, I have (finally) introduced the ability to send the results as an email report. This file contains the logic for generating and sending the email. 
+    - `mail_config.py` - As above, this is the configuration for the email sending functionality is held. Prior to the -e argument being called, the mail config needs to be configured with the correct settings. 
+    - Error handling and logging - Error handling was implemented (sort of) in version 2.2.0. In version 3.0.0, error handling has been significantly improved, including outputting an error in the case of internet connectivity issues. Logging has also been introduced, so that all errors and debug info are outputted to a file in the same directory, which follows the naming convention "error_log dd-mm-yy.txt". The reason for the date is to debug schedule scans, when the -sc argument is called. 
+    - Outputting to a file - In addition to sending an email with the results, the results can be output to a txt file by calling the -o argument. This file will be saved in the same directory. All other arguments will work as expected, for example, if port scanning is used, it too will be output to this file.
+
 # Disclaimer
 This script is intended for educational and lawful use only. It should only be used with the explicit permission of the domain owner or within the guidelines of a bug bounty program that permits the use of such tools. The developer of this script is not responsible or liable for any misuse or damage resulting from the improper use of this script. Before using this script in a bug bounty program, please ensure that the program's rules and guidelines allow its use. Use this script responsibly and ethically.
 
